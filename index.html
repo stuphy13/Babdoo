@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PHARMACOLOGY PRACTICE EXAM</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #121a2b;
+      --muted: #9fb3c8;
+      --text: #e6eef7;
+      --accent: #5ac8fa;
+      --accent-2: #9cffa8;
+      --danger: #ff6b6b;
+      --warning: #ffd166;
+      --ok: #00d1b2;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text); background: linear-gradient(135deg, #0b1220 0%, #0f1730 100%); min-height: 100vh; }
+    header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); background: rgba(11,18,32,0.7); border-bottom: 1px solid #1b2740; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 18px 20px; }
+    h1 { margin: 0; font-size: clamp(1.2rem, 2.4vw, 1.8rem); letter-spacing: .5px; }
+    nav { display: flex; gap: 10px; margin-top: 10px; }
+    .tab { border: 1px solid #223250; background: #10192b; padding: 8px 14px; border-radius: 999px; color: var(--muted); cursor: pointer; transition: all .2s; }
+    .tab.active { color: var(--text); border-color: var(--accent); box-shadow: 0 0 0 2px rgba(90,200,250,.15) inset; }
+
+    main { padding: 20px; }
+    .card { background: var(--card); border: 1px solid #1b2740; border-radius: 14px; padding: 18px; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .test-link { display: block; padding: 16px; border-radius: 12px; background: #0f1830; border: 1px solid #213052; text-decoration: none; color: var(--text); transition: transform .15s ease, box-shadow .15s ease; }
+    .test-link:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+    .test-title { font-weight: 700; }
+    .test-meta { color: var(--muted); font-size: .9rem; margin-top: 6px; }
+
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .timer { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--warning); }
+
+    .btn { border: 1px solid #213052; background: #112040; color: #eaf3ff; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: transform .1s ease, box-shadow .2s ease, background .2s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+    .btn.primary { background: #143660; border-color: #225a9e; }
+    .btn.success { background: #0c3e36; border-color: #0e6f62; }
+    .btn.danger { background: #3d1317; border-color: #7a1e28; }
+    .btn.ghost { background: transparent; }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+    .question { font-weight: 700; line-height: 1.4; }
+    .options { margin-top: 12px; display: grid; gap: 10px; }
+    label.option { display: flex; gap: 10px; align-items: flex-start; background: #0f1830; padding: 10px 12px; border-radius: 10px; border: 1px solid #213052; cursor: pointer; }
+    input[type="radio"] { transform: translateY(2px); }
+    .nav-row { display: flex; gap: 10px; margin-top: 12px; }
+
+    .muted { color: var(--muted); }
+    .score { font-size: 1.05rem; font-weight: 700; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid #213052; background: #0f1830; }
+
+    .wrong-item { border: 1px solid #3a2033; background: #1a0e16; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+    .wrong-q { font-weight: 700; color: #ffd6e7; }
+    .wrong-a { color: #ffb3c6; }
+    .correct-a { color: var(--accent-2); }
+
+    .profile-table { width: 100%; border-collapse: collapse; }
+    .profile-table th, .profile-table td { border-bottom: 1px solid #243354; padding: 10px; text-align: left; }
+    .profile-table th { color: var(--muted); font-weight: 600; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="row">
+        <h1>Babdoo!</h1>
+        <div class="row">
+          <button class="tab active" id="tab-home" onclick="showView('home')">Home</button>
+          <button class="tab" id="tab-profile" onclick="showView('profile')">Profile</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HOME VIEW -->
+    <section id="view-home" class="card">
+      <h2 style="margin-top:0">Practice Tests</h2>
+      <p class="muted">Each test runs at <strong>0.6 min per question</strong>. Your scores are saved locally on this device.</p>
+      <div id="testsGrid" class="grid"></div>
+    </section>
+
+    <!-- TEST VIEW -->
+    <section id="view-test" class="card hidden">
+      <div class="row" style="margin-bottom:10px;">
+        <div id="testTitle" class="pill">Practice Test</div>
+        <div class="timer" id="timer">00:00</div>
+      </div>
+
+      <div id="preStart">
+        <p class="muted">Time available for this test: <span id="preTime"></span></p>
+        <button class="btn primary" onclick="beginTest()">Start Test</button>
+        <button class="btn ghost" onclick="showView('home')">Cancel</button>
+      </div>
+
+      <div id="testBody" class="hidden">
+        <div id="qNum" class="muted" style="margin-bottom:6px"></div>
+        <div id="question" class="question"></div>
+        <div id="options" class="options"></div>
+        <div class="nav-row">
+          <button id="btnPrev" class="btn" onclick="prevQ()">Previous</button>
+          <button id="btnNext" class="btn" onclick="nextQ()">Next</button>
+          <div style="flex:1"></div>
+          <button id="btnSubmit" class="btn success" onclick="submitTest()">Submit</button>
+        </div>
+      </div>
+
+      <div id="results" class="hidden"></div>
+    </section>
+
+    <!-- PROFILE VIEW -->
+    <section id="view-profile" class="card hidden">
+      <h2 style="margin-top:0">Your Profile</h2>
+      <p class="muted">Scores are stored in your browser (local storage) on this device.</p>
+      <table class="profile-table" id="profileTable">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Test</th>
+            <th>Score</th>
+            <th>Out of</th>
+            <th>Percent</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // --- DATA: embedded tests (from your questions.js) ---
+    const tests = {"practice-test-1": [
+      {"question":"Which of the following cholinesterase inhibitors is used in the diagnosis of Myasthenia Gravis(MG)?","options":["Neostigmine","Physostigmine","Edrophonium","Pyridostigmine"],"correct":2},
+      {"question":"Atropine poisoning would be antagonized by:","options":["Pralidoxime","Neostigmine","Cyclopentolate","Physostigmine"],"correct":3},
+      {"question":"The selective β–2 sympathomimetic drugs differ from epinephrine in all of the following EXCEPT:","options":["They are active when administered orally","They have slower onset of action","They have shorter duration of action","Generally they do not stimulate the myocardium directly"],"correct":2},
+      {"question":"The sympathetic effect with the β3 adrenoceptors is:","options":["Increased lipolysis","Peripheral vasoconstriction","Increased heart rate and blood pressure","Bronchial dilatation and coronary dilation"],"correct":0},
+      {"question":"The bladder trigone and prostatic muscles are relaxed by:","options":["Adrenergic a-1 agonists","Adrenergic a-1 antagonists","Adrenergic a-2 agonists","Adrenergic a-2 antagonists"],"correct":1},
+      {"question":"Which of the following sympatholytic drugs that is α-1 selective blocker whose adverse effects include postural hypotension particularly in the beginning?","options":["Tolazoline","Prazosin","Phentolamine","Phenoxybenzamine"],"correct":1},
+      {"question":"Which of the following agonists would be used for asthma patients or to delay premature labor?","options":["β2-agonist","β1-agonist","α1-agonist","α2-agonist"],"correct":0},
+      {"question":"All of the following are primary effect of stimulating muscarinic actions of cholinergic agonists EXCEPT:","options":["Release of nitric oxide (vasodilation)","Iris contraction (miosis)","Ciliary muscle contraction and accommodation of the lens (near vision)","Bronchi dilation and decreased bronchiole secretions"],"correct":3},
+      {"question":"Which of the following is NOT a muscarinic actions of cholinergic agonist drug?","options":["Tachycardia, increased conduction velocity","Increased GI tract tone and secretions","Diaphoresis from sweat glands","Contraction of urinary detrussor muscle and relaxation of urinary sphincter"],"correct":0},
+      {"question":"What type of drugs are atropine, scopolamine, and pirenzepine?","options":["Acetylcholine agonists","Acetylcholinesterase inhibitors","Muscarinic agonists","Muscarinic antagonists"],"correct":3},
+      {"question":"Which of the following reversible anticholinesterase (AchE) is used for atropine intoxication?","options":["Neostigmine","Physostigmine","Edrophonium","Donepezil"],"correct":1},
+      {"question":"All of the following are irreversible cholinesterase inhibitors EXCEPT","options":["Tacrine","Echothiophate","Parathion","Malathion"],"correct":0},
+      {"question":"Which of the following is NOT an effect of autonomic ganglion blocking?","options":["Xerostomia","Mydriasis","Cycloplegia","Hypertension"],"correct":3},
+      {"question":"Which of the following is indirect acting carbamates cholinomimetic with poor lipid solubility and a duration of action of about 2–4 hours?","options":["Betanechol","Physostigmine","Pilocarpine","Neostigmine"],"correct":3},
+      {"question":"Which of the following agents is a prodrug that is much less toxic in mammal than insects?","options":["Echothiophate","Parathion","Malathion","Sarin"],"correct":2},
+      {"question":"Which one of the following antimuscarinic agents does NOT cause cycloplegia when used topically in the eye?","options":["Atropine","Cyclopentolate","Tropicamide","Physostigmine"],"correct":3},
+      {"question":"Which of the following beta blocker that has an additional a–1 blocking and vasodilator properties?","options":["Acebutolol","Propranolol","Carvedilol","Metoprolol"],"correct":2},
+      {"question":"Which of the following ultrashort acting cardioselective β–blocker given by IV infusion?","options":["Esmolol","Bisoprolol","Timolol","Sotalol"],"correct":0}
+    ],
+    "practice-test-2": [
+      {"question":"Anticholinesterase drugs do NOT produce:","options":["Bradycardia, no change or modest fall in blood pressure","Increased strength of muscle contraction, especially in muscles weakened by myasthenia gravis","Miosis and reduction of intraocular pressure","Rise in BP and tachycardia"],"correct":3},
+      {"question":"Characteristics of pilocarpine include all of the following EXCEPT:","options":["It is a tertiary amine alkaloid","It causes miosis and a decrease in intraocular pressure","Causes a decrease in secretory and motor activity of gut","It is useful in the treatment of glaucoma"],"correct":2},
+      {"question":"Which of the following cholinomimetics is most widely used for paralytic ileus and atony of the urinary bladder?","options":["Lobeline","Neostigmine","Pilocarpine","Echothiophate"],"correct":1},
+      {"question":"Which of the following reversible anticholinesterase, longer acting, penetrates the blood-brain barrier used to treat post-op ileus, urinary retention and reversal of NMJ blockade?","options":["Physostigmine","Edrophonium","Neostigmine","Pyridostigmine"],"correct":0},
+      {"question":"Which of the following drugs is used for acute toxic effects of organophosphate cholinesterase inhibitors such as sarin or soman nerve agents?","options":["Atropine","Pilocarpine","Pralidoxime","Edrophonium"],"correct":2},
+      {"question":"Which of the following agents is a ganglion-blocking drug?","options":["Homatropine","Hexamethonium","Methscopolamine","Edrophonium"],"correct":1},
+      {"question":"Which of the following antimuscarinic drugs is often effective in preventing or reversing vestibular disturbances, especially motion sickness?","options":["Atropine","Ipratropium","Scopolamine","Homatropine"],"correct":2},
+      {"question":"Atropine is frequently used prior to administration of inhalant anesthetics as premedication to reduce:","options":["Muscle tone","Secretions","Nausea and vomiting","All of the above"],"correct":1},
+      {"question":"Which of the following drugs is useful in the treatment of Parkinson's disease?","options":["Benztropine","Edrophonium","Succinylcholine","Trimetaphan"],"correct":0},
+      {"question":"Which of the following antimuscarinic drug, which is used as a mydriatic?","options":["Pilocarpine","Neostigmine","Homatropine","Ipratropium"],"correct":2},
+      {"question":"Contraindications to the use of antimuscarinic drugs are all of the following EXCEPT:","options":["Glaucoma","Myasthenia","Bronchial asthma","Paralytic ileus and atony of the urinary bladder"],"correct":2},
+      {"question":"Which of the following agents is a short-acting ganglion blocker, poorly lipid soluble, inactive orally and has short half life?","options":["Homatropine","Trimethaphan","Hexamethonium","Pancuronium"],"correct":2},
+      {"question":"Which of the following effects is related to direct β1-adrenoreceptor stimulation?","options":["Bronchodilation","Vasodilatation","Tachycardia","Bradycardia"],"correct":2},
+      {"question":"The distribution of α- adrenoreceptor subtypes is associated with all of the following tissues except those of:","options":["Heart","Blood vessels","Prostate","Pupillary dilator muscle"],"correct":0},
+      {"question":"β adrenoreceptor subtypes is contained in all of the following tissues EXCEPT:","options":["Bronchial muscles","Heart","Pupillary dilator muscle","Fat cells"],"correct":2},
+      {"question":"In which of the following tissues both α and β1 adrenergic stimulation produces the same effect?","options":["Blood vessels","Intestine","Uterus","Bronchial muscles"],"correct":1},
+      {"question":"Which of the following selective β2 agonist drugs causes bronchodilation without significant cardiac stimulation?","options":["Isoprenaline","Terbutaline","Xylometazoline","Methoxamine"],"correct":1}
+    ],
+    "practice-test-3": [
+      {"question":"Which of the following statements regarding adrenergic drugs is NOT correct?","options":["Epinephrine acts on both α- and β-receptors","Norepinephrine has a predominantly β action","Methoxamine has a predominantly α action","Isoprenaline has a predominantly β action"],"correct":1},
+      {"question":"Which of the following direct-acting sympathomimetic drugs is a relatively pure alpha agonist, an effective mydriatic and decongestant and can be used to increase blood pressure?","options":["Epinephrine","Norepinephrine","Phenylephrine","Ephedrine"],"correct":2},
+      {"question":"Characteristics of a non-catecholamine EXCEPT:","options":["It is a potent selective beta 2 agonist","It causes uterine relaxation","It stimulates heart rate, contractility and cardiac output","It is used in the therapy of asthma"],"correct":2},
+      {"question":"Which of the following alpha adrenergic blocker, which binds covalently to alpha receptors, causing irreversible blockade of long duration (14–48 hours or longer):","options":["Phentolamine","Phenoxybenzamine","Ergotamine","Prazosin"],"correct":1},
+      {"question":"β–blockers metoprolol, bisoprolol and atenolol:","options":["Are beta1-selective antagonists","Are nonselective beta antagonists","Have intrinsic sympathomimetic activity","Have an anesthetic action"],"correct":0},
+      {"question":"Which of the following drugs is a nonselective beta-blocker without intrinsic sympathomimetic or local anesthetic activity and used for the treatment of life-threatening ventricular arrhythmias?","options":["Propranolol","Metoprolol","Sotalol","Atenolol"],"correct":2},
+      {"question":"The single most important antidote for cholinomimetic overdose is:","options":["Pralidoxime","Pilocarpine","Atropine","Succinylcholine"],"correct":2},
+      {"question":"Which of the following agents acts by promoting reactivation of phosphorylation acetylcholinesterase?","options":["Pralidoxime","Atropine","Pilocarpine","Neostigmine"],"correct":0},
+      {"question":"The M2 cholinergic receptor type is primarily located in what organ?","options":["Heart","Glands","Smooth muscle","Endothelium"],"correct":0},
+      {"question":"Which of the following receptor mediate vasodilation in the coronary, renal and mesenteric vessels?","options":["D1","β1","α-1","α-2"],"correct":0},
+      {"question":"The major mechanism for inactivation of neurotransmitter released at postganglionic parasympathetic nerve endings is:","options":["Enzymatic degradation of MAO","Reuptake into nerve endings","Enzymatic degradation of COMT","Enzymatic degradation of acetylcholinesterase"],"correct":3},
+      {"question":"Which of the following cholinomimetics activates both muscarinic and nicotinic receptors?","options":["Bethanechol","Pilocarpine","Nicotine","Lobeline"],"correct":2},
+      {"question":"Acetylcholine is NOT a specific neurotransmitter at:","options":["Sympathetic preganglionic neuron","Sympathetic postganglionic nerve endings","Parasympathetic preganglionic neuron","Parasympathetic postganglionic nerve endings"],"correct":1},
+      {"question":"Nicotinic acetylcholine receptors involve the movement of what ion across the cell membrane?","options":["K+","Ca++","Cl-","Na+"],"correct":3},
+      {"question":"Which of the following drugs inhibits the uptake and storage of norepinephrine by the storage vesicles?","options":["Guanethidine","Metyrosine","Reserpine","Botulinum toxin"],"correct":2},
+      {"question":"Acetylcholine binds to what muscarinic receptor leading to the IP3/DAG cascade in smooth muscle and glands?","options":["M1 receptor","M2 receptor","M3 receptor","M4 receptor"],"correct":2}
+    ],
+    "practice-test-4": [
+      {"question":"What muscarinic receptor inhibits adenylyl cyclase in the heart and intestines?","options":["M1 receptor","M2 receptor","M3 receptor","M4 receptor"],"correct":1},
+      {"question":"Adrenergic α-2 receptors ___ adenylyl cyclase and β receptors ___ adenylyl cyclase.","options":["Stimulate; Stimulate","Stimulate; Inhibit","Inhibit; Inhibit","Inhibit; Stimulate"],"correct":3},
+      {"question":"Which of the following statement about the sympathetic nervous system is incorrect?","options":["Innervation of vascular smooth muscle","Involves fight and fright functions","Has nicotinic receptors on cell bodies of all postganglionic neurons","Target organs have adrenoceptors for norepinephrine"],"correct":2},
+      {"question":"Preganglionic sympathetic and parasympathetic fibers release ____, postganglionic parasympathetic fibers release ____ for muscarinic cholinergic receptors, and postganglionic sympathetic fibers release ____ for adrenergic receptors.","options":["ACh; ACh; NE","ACh; NE; ACh","NE; ACh; NE","NE; NE; ACh"],"correct":0},
+      {"question":"Which of the following adrenergic receptors is most commonly found pre-synaptic?","options":["α1","α2","β1","β2"],"correct":1},
+      {"question":"What amino acids is converted into catecholamines (Norepinephrine, Epinephrine, Dopamine)?","options":["Alanine","Valine","Lysine","Tyrosine"],"correct":3},
+      {"question":"Norepinephrine transporter (NET) can be inhibited by what drug(s) resulting in increase neurotransmitter activity in the synaptic cleft?","options":["Metyrosine","Reserpine","Guanethidine and Bretylium","TCA and Cocaine"],"correct":3},
+      {"question":"Which of following β-adrenergic blocking drugs with α-blocking effect?","options":["Carvedilol","Labetalol","Nadolol","Both (a) and (b) are correct"],"correct":3},
+      {"question":"The mechanism of action of indirect-acting cholinomimetic agents is:","options":["Binding to and activation of muscarinic or nicotinic receptors","Inhibition of acetylcholinesterase action","Stimulation of the action of acetylcholinesterase","Releasing acetylcholine from storage sites"],"correct":1},
+      {"question":"Which of the following receptor subtypes relaxes smooth muscles and causes liver glycogenolysis and gluconeogenesis?","options":["α1","α2","β1","β2"],"correct":3},
+      {"question":"Which of the following receptor subtypes causes vascular smooth muscle contraction and genitourinary smooth muscle contraction?","options":["α1","α2","β1","β2"],"correct":0},
+      {"question":"Which of the following receptor subtypes increases heart rate and contractility, increases AV-node conduction velocity, and increases renin secretion in kidney juxtaglomerular cells?","options":["α1","α2","β1","β2"],"correct":2},
+      {"question":"Which of the following receptor subtype decreases insulin secretion from pancreatic β-cells, decreases nerve cell norepinephrine release, and contracts vascular smooth muscle?","options":["α1","α2","β1","β2"],"correct":1},
+      {"question":"What adrenergic receptor type activation results in inhibition of adenylyl cyclase via the coupling protein Gi?","options":["β1","β2","α1","α2"],"correct":3},
+      {"question":"What type of adrenergic receptor type that is mediated primarily by the coupling protein Gq causes activation of a membrane-bound phospholipase C (PLC)?","options":["α1","α2","β1","β2"],"correct":0},
+      {"question":"Which of the following adrenergic receptor activation mechanisms is involved with ephedrine, amphetamine, and tyramine?","options":["Direct binding to the receptor","Promoting release of norepinephrine","Inhibiting reuptake of norepinephrine","Inhibiting inactivation of norepinephrine"],"correct":1}
+    ],
+    "practice-test-5": [
+      {"question":"Which of the following adrenergic receptor activation mechanisms is involved with tricyclic antidepressants (TCA's) and cocaine?","options":["Direct binding to the receptor","Promoting release of norepinephrine","Inhibiting reuptake of norepinephrine","Inhibiting inactivation of norepinephrine"],"correct":2},
+      {"question":"What neurotransmitter is co-stored and co-released with ATP?","options":["Acetylcholine","Serotonin","Norepinephrine","GABA"],"correct":2},
+      {"question":"The following pharmacologic characteristics of carbachol include all except?","options":["it decreases intraocular pressure","it causes mydriasis","it exerts both nicotinic and muscarinic effects","it is resistant to acetylcholiesterase"],"correct":1},
+      {"question":"Dopamine receptor activation (D1) dilates renal blood vessels at low dose. At higher doses (treatment for shock), which of the following receptor is activated?","options":["α-1","α-2","β-1","β-2"],"correct":0},
+      {"question":"Following exposure to Sarin or Soman an organophosphate nerve gas that inhibits cholinesterase enzymes, which of the following symptoms would be noted?","options":["Dry mouth","Miosis","Tachycardia","Urinary retention"],"correct":1},
+      {"question":"If a patient is taking MAO inhibitors and ingests tyramine containing foods (red wine, aged cheese), which of the following acute responses is most likely?","options":["Stimulation of Norepinephrine release","Inhibition of Norepinephrine release","Stimulation of Acetylcholine release","Inhibition of Acetylcholine release"],"correct":0},
+      {"question":"Which of the following statements about adrenergic neurotransmission is correct?","options":["MAO converts dopamine to norepinephrine in nerve terminal","Epinephrine is the major neurotransmitter released from sympathetic nerve endings","Norepinephrine is principally released from the adrenals","TCA and cocaine prevent reuptake of norepinephrine into the nerve endings"],"correct":3},
+      {"question":"Which of the following G-protein is associated with smooth muscle and glandular tissue, muscarinic receptor M3, mobilizing internal Ca++ and the IP3-DAG cascade?","options":["Gs","Gi","Gq","Go"],"correct":2},
+      {"question":"By what mechanism do irreversible Acetylcholinesterase inhibitors permanently bind to the esteretic site enzyme?","options":["Hydroxylation","Hydrolysis","Phosphorylation","Methylation"],"correct":2},
+      {"question":"Which of the following G-protein is associated with heart and intestines, muscarinic receptor M2, decreasing adenyl cyclase activity, cAMP?","options":["Gs","Gi","Gq","Go"],"correct":1},
+      {"question":"α-2 stimulation leads to an increase in the cellular uptake of what ion, and thus a decrease in plasma concentration of what ion?","options":["K+","Ca++","Mg++","Na+"],"correct":1},
+      {"question":"Which of the following statements is NOT true of catecholamines?","options":["Can cross the blood-brain barrier","Cannot be used as an oral drug","Have short duration of action","MAO and COMT act rapidly"],"correct":0},
+      {"question":"Which of the following β-blockers is used in glaucoma patients for decreasing aqueous humor secretions from the ciliary body?","options":["Propranolol","Nadolol","Metoprolol","Timolol"],"correct":3},
+      {"question":"Which of the following is considered highly cardioselective β–blocker with vasodilation effect?","options":["Metoprolol","Atenolol","Nebivolol","Carvedilol"],"correct":2},
+      {"question":"After several doses of a new drug that causes dry mouth, dry eyes and rapid heart rate is most likely due to inhibition of what neurotransmitter?","options":["Norepinephrine","Acetylcholine","Epinephrine","Serotonin"],"correct":1},
+      {"question":"The ophthalmologist administer an eyedrop to dilate pupils prior to eye examination. The medication in the eyedrop is most likely acting on","options":["α-1 adrenergic receptors","Nicotinic receptors","Acetylcholinesterase","β-2 adrenergic receptors"],"correct":0}
+    ],
+    "practice-test-6": [
+      {"question":"All of the following statements are true regarding the parasympathetic nervous system except:","options":["Innervation of vascular smooth muscle","Involves rest and digestion functions","Has nicotinic receptors on cell bodies of all postganglionic neurons","Target organs have muscarinic receptors for Acetylcholine"],"correct":0},
+      {"question":"Nicotinic NM receptors are the ___ subtype and nicotinic NN receptors are the ___ subtype.","options":["Neuronal; Muscular","Muscular; Neuronal","Nodal; Neuronal","Neuronal; Nodal"],"correct":1},
+      {"question":"Which of the following drugs is a nonselective beta-blocker with intrinsic sympathomimetic activity?","options":["Propranolol","Metoprolol","Sotalol","Pindolol"],"correct":3},
+      {"question":"Which of the following classes of drugs will be useful in treating myasthenia gravis?","options":["Anticholinesterase agents","Muscarinic agonists","Nicotinic antagonists","Muscarinic antagonists"],"correct":0},
+      {"question":"Which of the following is a systemic effect of a muscarinic agonist?","options":["Increase blood pressure","Mydriasis","Constipation","Decrease heart rate"],"correct":3},
+      {"question":"What drug is a natural alkaloid found in plant deadly nightshade?","options":["Bethanechol","Pilocarpine","Scopolamine","Atropine"],"correct":3},
+      {"question":"Which of the following muscarinic antagonists with greater action on the CNS and its therapeutic use is limited to prevention of motion sickness?","options":["Atropine","Scopolamine","Homatropine","Tropicamide"],"correct":1},
+      {"question":"Of the following mydriatics/cycloplegics, ____ last 7-10 days (longest) and ____ last 6 hours (shortest).","options":["Atropine; Scopolamine","Homatropine; Tropicamide","Tropicamide; Atropine","Atropine; Tropicamide"],"correct":3},
+      {"question":"Which of the following reversible cholinesterase inhibitors is used for atropa belladonna poisoning?","options":["Malathion","Physostigmine","Edrophonium","Donepezil"],"correct":1},
+      {"question":"Which of the following reversible cholinesterase inhibitors is used for anesthesia?","options":["Neostigmine","Physostigmine","Edrophonium","Donepezil"],"correct":0},
+      {"question":"Which of the following reversible cholinesterase inhibitors is used for Alzheimer disease?","options":["Neostigmine","Physostigmine","Edrophonium","Donepezil"],"correct":3},
+      {"question":"A direct-acting cholinomimetic that is lipid soluble and has been used in the treatment of glaucoma is:","options":["Betanechol","Neostigmine","Pilocarpine","Edrophonium"],"correct":2},
+      {"question":"Activation of β receptors positive inotropic effects on the heart by increased intracellular availability of what ion?","options":["K+","Na+","Cl-","Ca++"],"correct":3},
+      {"question":"Which of the following agonists can cause hyperglycemia in diabetics?","options":["α2-agonist","α1-agonist","β2-agonist","β1-agonist"],"correct":2},
+      {"question":"Which of the following is NOT an irreversible cholinesterase inhibitor (organophosphate AChE inhibitors)?","options":["Tacrine","Echothiophate","Sarin, soman","Malathion, parathion"],"correct":0}
+    ]};
+
+    // --- STATE ---
+    let currentTestId = null;
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = [];// stores selected option index per q (or null)
+    let started = false;
+    let submitted = false;
+    let timerId = null;
+    let timeLeft = 0; // in seconds
+
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function showView(name){
+      // tabs
+      $$('#tab-home, #tab-profile').forEach(b=>b.classList.remove('active'));
+      if(name==='home') $('#tab-home').classList.add('active');
+      if(name==='profile') $('#tab-profile').classList.add('active');
+
+      // sections
+      $('#view-home').classList.toggle('hidden', name!=='home');
+      $('#view-test').classList.toggle('hidden', name!=='test');
+      $('#view-profile').classList.toggle('hidden', name!=='profile');
+      if(name==='home') renderHome();
+      if(name==='profile') renderProfile();
+    }
+
+    function renderHome(){
+      const grid = $('#testsGrid');
+      grid.innerHTML = '';
+      const entries = Object.entries(tests);
+      entries.forEach(([id, arr], idx)=>{
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'test-link';
+        a.onclick = (e)=>{ e.preventDefault(); openTest(id); };
+        const title = `Practice Test ${idx+1}`;
+        a.innerHTML = `<div class="test-title">${title}</div><div class="test-meta">${arr.length} questions • ${(arr.length*0.6).toFixed(1)} min</div>`;
+        grid.appendChild(a);
+      });
+    }
+
+    function openTest(id){
+      currentTestId = id;
+      currentQuestions = tests[id];
+      currentIndex = 0;
+      userAnswers = Array(currentQuestions.length).fill(null);
+      started = false; submitted = false;
+      // timer setup: 0.6 min per question = 36 seconds per question
+      timeLeft = Math.round(currentQuestions.length * 0.6 * 60);
+      $('#testTitle').textContent = prettyTestTitle(id);
+      $('#preTime').textContent = `${formatTime(timeLeft)} (${(currentQuestions.length*0.6).toFixed(1)} min)`;
+      $('#timer').textContent = formatTime(timeLeft);
+      $('#preStart').classList.remove('hidden');
+      $('#testBody').classList.add('hidden');
+      $('#results').classList.add('hidden');
+      showView('test');
+    }
+
+    function beginTest(){
+      if(started) return;
+      started = true;
+      $('#preStart').classList.add('hidden');
+      $('#testBody').classList.remove('hidden');
+      renderQuestion();
+      startTimer();
+    }
+
+    function renderQuestion(){
+      const q = currentQuestions[currentIndex];
+      $('#qNum').textContent = `Question ${currentIndex+1} of ${currentQuestions.length}`;
+      $('#question').textContent = q.question;
+      const opts = q.options.map((opt, i)=>{
+        const checked = userAnswers[currentIndex]===i ? 'checked' : '';
+        return `<label class="option"><input type="radio" name="q${currentIndex}" value="${i}" ${checked} ${submitted?'disabled':''}/> <span>${opt}</span></label>`;
+      }).join('');
+      $('#options').innerHTML = opts;
+      $('#btnPrev').disabled = currentIndex===0 || submitted;
+      $('#btnNext').disabled = currentIndex===currentQuestions.length-1 || submitted;
+      $('#btnSubmit').disabled = submitted;
+    }
+
+    function nextQ(){ saveAnswer(); if(currentIndex < currentQuestions.length-1){ currentIndex++; renderQuestion(); } }
+    function prevQ(){ saveAnswer(); if(currentIndex>0){ currentIndex--; renderQuestion(); } }
+
+    function saveAnswer(){
+      if(submitted) return;
+      const nodes = $$(`input[name="q${currentIndex}"]`);
+      const found = nodes.find(n=>n.checked);
+      if(found) userAnswers[currentIndex] = parseInt(found.value,10);
+    }
+
+    function startTimer(){
+      updateTimerDisplay();
+      clearInterval(timerId);
+      timerId = setInterval(()=>{
+        timeLeft--; updateTimerDisplay();
+        if(timeLeft<=0){ clearInterval(timerId); if(!submitted) submitTest(true); }
+      }, 1000);
+    }
+
+    function updateTimerDisplay(){
+      $('#timer').textContent = formatTime(Math.max(0,timeLeft));
+    }
+
+    function formatTime(sec){
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function submitTest(auto=false){
+      saveAnswer();
+      submitted = true;
+      clearInterval(timerId);
+      // lock UI: hide questions and nav entirely per your requirement
+      $('#testBody').classList.add('hidden');
+
+      // score
+      let score = 0; const wrong = [];
+      currentQuestions.forEach((q, i)=>{
+        if(userAnswers[i] === q.correct) score++; else wrong.push({i,q,chosen:userAnswers[i]});
+      });
+
+      // persist attempt
+      const attempt = {
+        id: crypto.randomUUID(),
+        testId: currentTestId,
+        when: new Date().toISOString(),
+        score,
+        total: currentQuestions.length,
+        percent: Math.round((score/currentQuestions.length)*1000)/10
+      };
+      saveAttempt(attempt);
+
+      // results view
+      const res = $('#results');
+      const summary = `<div class="row"><div class="score">Your Score: ${score} / ${currentQuestions.length}</div><div class="pill">${attempt.percent}%</div></div>`;
+      let wrongList = '';
+      if(wrong.length){
+        wrongList += `<h3 style="margin-top:16px;">Review wrong answers</h3>`;
+        wrong.forEach(item=>{
+          const {i, q, chosen} = item;
+          const your = chosen==null ? '<em class="muted">No answer</em>' : escapeHtml(q.options[chosen]);
+          const correct = escapeHtml(q.options[q.correct]);
+          wrongList += `
+            <div class="wrong-item">
+              <div class="wrong-q">Q${i+1}. ${escapeHtml(q.question)}</div>
+              <div class="wrong-a">Your answer: ${your}</div>
+              <div class="correct-a">Correct: ${correct}</div>
+              <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn" onclick="openGPT('${encodeURIComponent(q.question)}')">Search on GPT</button>
+                <button class="btn ghost" onclick="copyPrompt(${i})">Copy prompt</button>
+              </div>
+            </div>`;
+        });
+      } else {
+        wrongList = `<p class="muted" style="margin-top:16px;">All answers correct. 🎉</p>`;
+      }
+
+      const actions = `<div class="nav-row" style="margin-top:12px;">
+          <button class="btn" onclick="showView('home')">Back to Home</button>
+          <button class="btn" onclick="showView('profile')">Go to Profile</button>
+        </div>`;
+
+      res.innerHTML = summary + wrongList + actions + (auto?`<p class="muted" style="margin-top:8px;">Submitted automatically when time ran out.</p>`:'');
+      res.classList.remove('hidden');
+    }
+
+    function openGPT(encodedQuestion){
+      const url = `https://chat.openai.com/?q=${encodedQuestion}`;
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function copyPrompt(i){
+      const q = currentQuestions[i].question;
+      const text = `Explain this question in detail and show step-by-step reasoning: \n\n${q}`;
+      navigator.clipboard.writeText(text).then(()=>{
+        alert('Copied prompt to clipboard. Paste it in GPT to get a detailed solution.');
+      });
+    }
+
+    // --- PROFILE (local storage) ---
+    const LS_KEY = 'pharm_exam_scores_v1';
+    function loadAll(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || { attempts: [] }; }
+      catch{ return { attempts: [] }; }
+    }
+    function saveAll(obj){ localStorage.setItem(LS_KEY, JSON.stringify(obj)); }
+    function saveAttempt(att){
+      const data = loadAll();
+      data.attempts.push(att);
+      saveAll(data);
+    }
+
+    function renderProfile(){
+      const tbody = $('#profileTable tbody');
+      tbody.innerHTML = '';
+      const data = loadAll();
+      if(!data.attempts.length){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="5" class="muted">No attempts yet. Take a practice test from the Home page.</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+      // newest first
+      const sorted = [...data.attempts].sort((a,b)=> new Date(b.when)-new Date(a.when));
+      sorted.forEach(att=>{
+        const tr = document.createElement('tr');
+        const d = new Date(att.when);
+        tr.innerHTML = `
+          <td>${d.toLocaleString()}</td>
+          <td>${prettyTestTitle(att.testId)}</td>
+          <td>${att.score}</td>
+          <td>${att.total}</td>
+          <td>${att.percent}%</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function prettyTestTitle(id){
+      const idx = Object.keys(tests).indexOf(id);
+      return idx>=0 ? `Practice Test ${idx+1}` : id;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+    }
+
+    // init
+    renderHome();
+  </script>
+</body>
+</html>
